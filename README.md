@@ -295,3 +295,153 @@ public class Main {
         scanner.close();
     }
 }
+
+...........................................................
+
+// === ВСТАВИТЬ В МЕНЮ 4 (СЦЕНАРИЙ) ===
+manager.addPolicy(new Policy<BaseEntity>("Защита по имени",
+        e -> e.getName().contains("TV") && e.isActive(),
+        e -> {
+            e.stop();
+            System.out.println("-> Сработал сценарий: " + e.getName() + " остановлен.");
+        }
+));
+
+// === ВСТАВИТЬ В МЕНЮ 6 (АНАЛИТИКА) ===
+System.out.println("ТОП-3 самых высоких показателей во всей системе:");
+manager.getAnalyticsStream()
+        .sorted((e1, e2) -> Double.compare(e2.getMainMetric(), e1.getMainMetric()))
+        .limit(3)
+        .forEach(e -> System.out.println("  " + e.getName() + " -> " + e.getMainMetric()));
+
+................................................................
+
+// === ВСТАВИТЬ В МЕНЮ 4 (СЦЕНАРИЙ) ===
+manager.addPolicy(new Policy<BaseEntity>("Оптимизация параметров TypeA",
+        e -> e instanceof TypeA && e.isActive() && ((TypeA) e).getCustomProperty() > 80,
+        e -> {
+            ((TypeA) e).setCustomProperty(30);
+            System.out.println("-> Сработал сценарий: Свойство " + e.getName() + " снижено до 30.");
+        }
+));
+
+// === ВСТАВИТЬ В МЕНЮ 6 (АНАЛИТИКА) ===
+double sum = manager.getAnalyticsStream()
+        .filter(e -> e.isActive())
+        .mapToDouble(e -> e.getMainMetric())
+        .sum();
+System.out.println("Суммарный показатель всех работающих элементов: " + sum);
+
+.................................................................
+
+// === ВСТАВИТЬ В МЕНЮ 4 (СЦЕНАРИЙ) ===
+manager.addPolicy(new Policy<BaseEntity>("Ночной режим для TypeA",
+        e -> e instanceof TypeA && e.getName().contains("Коридор") && !e.isActive(),
+        e -> {
+            e.start();
+            ((TypeA) e).setOptionalString("Red");
+            System.out.println("-> Сработал сценарий: " + e.getName() + " включен в режиме Red.");
+        }
+));
+
+// === ВСТАВИТЬ В МЕНЮ 6 (АНАЛИТИКА) ===
+List<String> affectedGroups = manager.getGroupsMap().entrySet().stream()
+        .filter(entry -> entry.getValue().stream().anyMatch(e -> !e.isActive()))
+        .map(Map.Entry::getKey)
+        .collect(java.util.stream.Collectors.toList());
+System.out.println("Группы, в которых есть неактивные элементы: " + affectedGroups);
+
+.......................................................................
+
+// === ВСТАВИТЬ В МЕНЮ 4 (СЦЕНАРИЙ) ===
+manager.addPolicy(new Policy<BaseEntity>("Аварийная защита TypeB",
+        e -> e instanceof TypeB && e.isActive() && ((TypeB) e).getSecondaryMetric() > 500.0,
+        e -> {
+            e.stop();
+            ((TypeB) e).setSecondaryMetric(0.0);
+            System.out.println("-> Сработал сценарий: АВАРИЙНЫЙ СТОП для " + e.getName() + ", параметры сброшены.");
+        }
+));
+
+// === ВСТАВИТЬ В МЕНЮ 6 (АНАЛИТИКА) ===
+Map<Boolean, List<BaseEntity>> grouped = manager.getAnalyticsStream()
+        .collect(java.util.stream.Collectors.groupingBy(BaseEntity::isActive));
+
+System.out.println("Группировка по статусу:");
+System.out.println("  Активные (true):");
+if(grouped.containsKey(true)) grouped.get(true).forEach(e -> System.out.println("    " + e.getName()));
+System.out.println("  Остановленные (false):");
+if(grouped.containsKey(false)) grouped.get(false).forEach(e -> System.out.println("    " + e.getName()));
+
+..............................................................................
+
+// === ВСТАВИТЬ В МЕНЮ 4 (СЦЕНАРИЙ) ===
+manager.addPolicy(new Policy<BaseEntity>("Сброс фантомного расхода",
+        e -> !e.isActive() && e.getMainMetric() > 0,
+        e -> {
+            e.setMainMetric(0.0);
+            System.out.println("-> Сработал сценарий: Устранен фантомный расход в " + e.getName());
+        }
+));
+
+// === ВСТАВИТЬ В МЕНЮ 6 (АНАЛИТИКА) ===
+manager.getAnalyticsStream()
+        .filter(e -> e.isActive())
+        .min((e1, e2) -> Double.compare(e1.getMainMetric(), e2.getMainMetric()))
+        .ifPresentOrElse(
+            e -> System.out.println("Элемент с минимальной метрикой: " + e.getName() + " (" + e.getMainMetric() + ")"),
+            () -> System.out.println("Нет активных элементов в системе.")
+        );
+
+..................................................................................
+
+// === ВСТАВИТЬ В МЕНЮ 4 (СЦЕНАРИЙ) ===
+manager.addPolicy(new Policy<BaseEntity>("Эко-контроль для TypeB",
+        e -> e instanceof TypeB && e.getName().contains("Eco") && e.isActive(),
+        e -> {
+            ((TypeB) e).setSecondaryMetric(18.0);
+            System.out.println("-> Сработал сценарий: " + e.getName() + " переведен в ЭКО-режим (18.0)");
+        }
+));
+
+// === ВСТАВИТЬ В МЕНЮ 6 (АНАЛИТИКА) ===
+Map<String, Long> classCount = manager.getAnalyticsStream()
+        .collect(java.util.stream.Collectors.groupingBy(
+                e -> e.getClass().getSimpleName(),
+                java.util.stream.Collectors.counting()
+        ));
+classCount.forEach((className, count) -> System.out.println("Класс [" + className + "] -> Количество: " + count + " шт."));
+
+......................................................................................
+
+// === ВСТАВИТЬ В МЕНЮ 4 (СЦЕНАРИЙ) ===
+manager.addPolicy(new Policy<BaseEntity>("Форсированный режим TypeB",
+        e -> e instanceof TypeB && e.isActive() && ((TypeB) e).getSecondaryMetric() > 10000.0,
+        e -> {
+            e.setMainMetric(100.0);
+            System.out.println("-> Сработал сценарий: Элемент " + e.getName() + " выведен на максимальную мощность!");
+        }
+));
+
+// === ВСТАВИТЬ В МЕНЮ 6 (АНАЛИТИКА) ===
+double criticalValue = 3000.0; // Порог из билета
+boolean hasCritical = manager.getAnalyticsStream()
+        .anyMatch(e -> e.getMainMetric() > criticalValue);
+System.out.println("Есть ли в облаке/доме элементы с показателем выше " + criticalValue + "? -> " + (hasCritical ? "ДА" : "НЕТ"));
+
+......................................................................................
+
+// === ВСТАВИТЬ В МЕНЮ 4 (СЦЕНАРИЙ) ===
+manager.addPolicy(new Policy<BaseEntity>("Форсированный режим TypeB",
+        e -> e instanceof TypeB && e.isActive() && ((TypeB) e).getSecondaryMetric() > 10000.0,
+        e -> {
+            e.setMainMetric(100.0);
+            System.out.println("-> Сработал сценарий: Элемент " + e.getName() + " выведен на максимальную мощность!");
+        }
+));
+
+// === ВСТАВИТЬ В МЕНЮ 6 (АНАЛИТИКА) ===
+double criticalValue = 3000.0; // Порог из билета
+boolean hasCritical = manager.getAnalyticsStream()
+        .anyMatch(e -> e.getMainMetric() > criticalValue);
+System.out.println("Есть ли в облаке/доме элементы с показателем выше " + criticalValue + "? -> " + (hasCritical ? "ДА" : "НЕТ"));
