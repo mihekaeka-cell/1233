@@ -6,6 +6,7 @@ public interface Actionable {
     boolean isWorking();  // Вкл ли? / Активен ли?
 }
 
+.............................................................................................
 
 package models;
 
@@ -48,6 +49,8 @@ public abstract class BaseEntity implements Actionable {
     public void stopAction() { this.status = false; }
 }
 
+...........................................................................
+
 package models;
 
 public class ConcreteTypeA extends BaseEntity {
@@ -76,7 +79,7 @@ public class ConcreteTypeA extends BaseEntity {
     }
 }
 
-
+...........................................................................................
 
 package logic;
 
@@ -114,6 +117,7 @@ public class CustomPolicy<T extends BaseEntity> {
     }
 }
 
+...........................................................................................
 
 package logic;
 
@@ -186,7 +190,7 @@ public class GroupManager {
     }
 }
 
-
+.........................................................................................................
 
 package main;
 
